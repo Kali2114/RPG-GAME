@@ -3,15 +3,15 @@ import random
 class Warrior:
     lvl_mapping = {
         1: 0,
-        2: 48,
-        3: 75,
-        4: 112,
+        2: 31,
+        3: 65,
+        4: 107,
         5: 159,
         6: 212,
         7: 308,
-        8: 324,
-        9: 472,
-        10: 615
+        8: 412,
+        9: 563,
+        10: 750
     }
     statistic_mapping = {
         1: {'attack': 9, 'defence': 7, 'health': 108},
@@ -32,7 +32,7 @@ class Warrior:
         self.health = 108
         self.level = 1
         self.experience = 0
-        self.eq = {}
+        self.eq = set()
 
     def check_experience(self, experience):
         self.experience += experience
@@ -47,6 +47,13 @@ class Warrior:
             self.attack = stats['attack']
             self.defence = stats['defence']
             self.health = stats['health']
+
+            for item in self.eq:
+                if item.attack_value is not None:
+                    self.attack += item.attack_value
+                if item.defend_value is not None:
+                    self.defence += item.defend_value
+
             print(f'You reached level {self.level}.')
             print('Update statistics:')
             print(f"HP = {self.health} (+{stats['health'] - previous_stats['health']})\n"
@@ -58,10 +65,29 @@ class Warrior:
         moob.health -= dmg
         print(f'Your attack make {dmg:.1f} damage to {moob.name}')
         if moob.health <= 0:
-            print(f'You killed {moob.name}')
+            print(f'You killed {moob.name}.')
             print(f'You gained {moob.exp} experience.')
             self.check_experience(moob.exp)
 
+    def add_to_inventory(self, item):
+        if isinstance(item, Item):
+            print(f'You dropped {item.name}')
+            if item.name not in self.eq:
+                self.eq.add(item)
+                print(f'Added {item.name} to inventory.')
+                if item.attack_value is not None:
+                    self.attack += item.attack_value
+                if item.defend_value is not None:
+                    self.defence += item.defend_value
+            else:
+                print(f'You already have {item.name}')
+        else:
+            print('Error')
+
+    def check_stats(self):
+        print(f'Attack: {self.attack}\n'
+              f'Defence: {self.defence}\n'
+              f'Health: {self.health}')
 
 class Moob:
     moob_mapping = {
@@ -70,7 +96,7 @@ class Moob:
     }
     def __init__(self, name):
         self.name = name
-        moob_data = self.moob_mapping.get(name, None)
+        moob_data = self.moob_mapping.get(name)
         self.attack = random.randint(*moob_data['attack'])
         self.defence = random.randint(*moob_data['defence'])
         self.health = random.randint(*moob_data['health'])
@@ -88,11 +114,22 @@ class Moob:
         player.health -= damage
         print(f'{self.name} attack you and make {damage:.1f} damages. {player.health:.1f} HP left.')
 
+    def drop(self):
+        if random.random() < 0.1:
+            item_type = random.choice(['weapon', 'armor', 'shield'])
+            item_date = Item.items.get(item_type)
+            if item_date:
+                return Item(item_type)
+        else:
+            return None
+
+
 
 class Board:
     def __init__(self, player):
         self.player = player
         self.moob = None
+
     def battle(self, moob):
         self.moob = moob
         while True:
@@ -106,6 +143,10 @@ class Board:
                 self.player.attack_moob(self.moob)
                 if self.moob.health > 0:
                     self.moob.attack_player(self.player)
+                else:
+                    dropped_item = moob.drop()
+                    if dropped_item:
+                        self.player.add_to_inventory(dropped_item)
             elif choice == 2:
                 self.moob.attack_player(self.player)
                 continue
@@ -132,7 +173,7 @@ class Maps:
         board = Board(player)
         print(f'Welcome in PIERZAG_GAME, {player.name}!')
         while True:
-            print('1. Explore maps\n2. Exit game')
+            print('1. Explore maps\n2. Check stats\n3. Exit game')
             try:
                 choice = int(input('What would you like to do: '))
             except ValueError:
@@ -141,6 +182,8 @@ class Maps:
             if choice == 1:
                 self.explore_map(board)
             elif choice == 2:
+                player.check_stats()
+            elif choice == 3:
                 return
             else:
                 print('Wrong choice.')
@@ -177,16 +220,19 @@ class Maps:
 class Item:
 
     items = {
-        'weapon': {'name': 'Magic Sword', 'value': 21},
-        'armor': {'name': 'Plate Armor', 'value': 19},
-        'shield': {'name': 'Tiger Shield', 'value': 11}
+        'weapon': {'name': 'Magic Sword', 'attack_value': 21},
+        'armor': {'name': 'Plate Armor', 'defend_value': 19},
+        'shield': {'name': 'Tiger Shield', 'defend_value': 11}
     }
 
-    def __init__(self, item_type='Unkown'):
-        item_data = self.items.get(item_type, self.items['unkown'])
+    def __init__(self, item_type='Unknown'):
+        item_data = self.items.get(item_type)
         self.name = item_data['name']
-        self.value = item_data['value']
+        # self.value = item_data['value']
         self.item_type = item_type
+        self.attack_value = item_data.get('attack_value')
+        self.defend_value = item_data.get('defend_value')
+
 
 
 
