@@ -1,0 +1,6 @@
+# .gitignore
+/*
+!/GAME.py
+
+/.idea
+/__pycache__
