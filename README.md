@@ -52,3 +52,7 @@ Pierzag Game is a simple text-based RPG where you, as a warrior, explore differe
 1. Clone the repository.
    ```bash
    git clone https://github.com/Kali2114/RPG-GAME
+
+## License
+
+This project is licensed under the GNU General Public License v3.0.
