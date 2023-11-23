@@ -92,7 +92,8 @@ class Warrior:
 class Moob:
     moob_mapping = {
         'Troll': {'attack': (4, 7), 'defence': (2, 5), 'health': (63, 78), 'exp': (21, 23)},
-        'Goblin': {'attack': (5, 9), 'defence': (3, 6), 'health': (70, 82), 'exp': (25, 28)}
+        'Goblin': {'attack': (5, 9), 'defence': (3, 6), 'health': (70, 82), 'exp': (25, 28)},
+        'Orc': {'attack': (9, 11), 'defence': (9, 10), 'health': (80, 93), 'exp': (31, 38)}
     }
     def __init__(self, name):
         self.name = name
@@ -166,7 +167,8 @@ class Maps:
     def __init__(self):
         self.maps = [
             {'name': 'Forrest', 'moob': 'Troll'},
-            {'name': 'Dessert', 'moob': 'Goblin'}
+            {'name': 'Dessert', 'moob': 'Goblin'},
+            {'name': 'Swamp', 'moob': 'Orc'}
         ]
     def menu(self):
         player = Warrior('Tisuan')
@@ -228,7 +230,6 @@ class Item:
     def __init__(self, item_type='Unknown'):
         item_data = self.items.get(item_type)
         self.name = item_data['name']
-        # self.value = item_data['value']
         self.item_type = item_type
         self.attack_value = item_data.get('attack_value')
         self.defend_value = item_data.get('defend_value')
